@@ -15,59 +15,24 @@ import (
 	serviceutil "github.com/argoproj/argo-rollouts/utils/service"
 )
 
-// rolloutBlueGreen implements the logic for rolling a new replica set.
+// rolloutBlueGreen implements the logic for rolling a new replica set. It runs the blue-green
+// stages in order, then syncs status unless a stage ended the pass without one
+// (stageStopNoStatus).
 func (c *rolloutContext) rolloutBlueGreen() error {
 	previewSvc, activeSvc, err := c.getPreviewAndActiveServices()
 	if err != nil {
 		return err
 	}
-	c.newRS, err = c.getAllReplicaSetsAndSyncRevision()
+	newRS, err := c.getAllReplicaSetsAndSyncRevision()
 	if err != nil {
 		return fmt.Errorf("failed to getAllReplicaSetsAndSyncRevision in rolloutBlueGreen create true: %w", err)
 	}
+	c.newRS = newRS
 
-	// This must happen right after the new replicaset is created
-	err = c.reconcilePreviewService(previewSvc)
-	if err != nil {
-		return err
+	stageErr := c.runBlueGreenStages(previewSvc, activeSvc)
+	if c.skipStatusSync {
+		return stageErr
 	}
-
-	if replicasetutil.CheckPodSpecChange(c.rollout, c.newRS) {
-		return c.syncRolloutStatusBlueGreen(previewSvc, activeSvc)
-	}
-
-	_, err = c.podRestarter.Reconcile(c)
-	if err != nil {
-		return err
-	}
-
-	err = c.reconcileBlueGreenReplicaSets(activeSvc)
-	if err != nil {
-		return err
-	}
-
-	c.reconcileBlueGreenPause(activeSvc, previewSvc)
-
-	err = c.reconcileActiveService(activeSvc)
-	if err != nil {
-		return err
-	}
-
-	err = c.awsVerifyTargetGroups(activeSvc)
-	if err != nil {
-		return err
-	}
-
-	err = c.reconcileAnalysisRuns()
-	if err != nil {
-		return err
-	}
-
-	err = c.reconcileEphemeralMetadata()
-	if err != nil {
-		return err
-	}
-
 	return c.syncRolloutStatusBlueGreen(previewSvc, activeSvc)
 }
 
@@ -111,8 +76,8 @@ func (c *rolloutContext) reconcileBlueGreenReplicaSets(activeSvc *corev1.Service
 
 // isBlueGreenFastTracked returns true if we should skip the pause step because update has been fast tracked
 func (c *rolloutContext) isBlueGreenFastTracked(activeSvc *corev1.Service) bool {
-	if replicasetutil.HasScaleDownDeadline(c.newRS) {
-		c.log.Infof("Detected scale down annotation for ReplicaSet '%s' and will skip pause", c.newRS.Name)
+	if c.isFastRollback() {
+		c.log.Infof("Fast rollback or promoted state detected for ReplicaSet '%s' and will skip pause", c.newRS.Name)
 		return true
 	}
 	if c.rollout.Status.PromoteFull {
@@ -310,7 +275,6 @@ func (c *rolloutContext) syncRolloutStatusBlueGreen(previewSvc *corev1.Service, 
 		// newStatus.ReadyReplicas = replicasetutil.GetReadyReplicaCountForReplicaSets(c.allRSs)
 	}
 
-	newStatus = c.calculateRolloutConditions(newStatus)
 	return c.persistRolloutStatus(&newStatus)
 }
 

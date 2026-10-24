@@ -30,6 +30,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/kubectl/pkg/scheme"
+	"sigs.k8s.io/yaml"
 
 	argoinformers "github.com/argoproj/argo-rollouts/pkg/client/informers/externalversions/rollouts/v1alpha1"
 	timeutil "github.com/argoproj/argo-rollouts/utils/time"
@@ -311,12 +312,18 @@ func NewAPIFactorySettings(arInformer argoinformers.AnalysisRunInformer) api.Set
 		SecretName:    NotificationSecret,
 		ConfigMapName: NotificationConfigMap,
 		InitGetVars: func(cfg *api.Config, configMap *corev1.ConfigMap, secret *corev1.Secret) (api.GetVars, error) {
+			notificationContext, err := getNotificationContext(configMap)
+			if err != nil {
+				return nil, err
+			}
+
 			return func(obj map[string]any, dest services.Destination) map[string]any {
 
 				var vars = map[string]any{
 					"rollout": obj,
 					"time":    timeExprs,
 					"secrets": secret.Data,
+					"context": notificationContext,
 				}
 
 				if arInformer == nil {
@@ -346,11 +353,25 @@ func NewAPIFactorySettings(arInformer argoinformers.AnalysisRunInformer) api.Set
 					"analysisRuns": arsObj,
 					"time":         timeExprs,
 					"secrets":      secret.Data,
+					"context":      notificationContext,
 				}
 				return vars
 			}, nil
 		},
 	}
+}
+
+func getNotificationContext(configMap *corev1.ConfigMap) (map[string]any, error) {
+	notificationContext := map[string]any{}
+	if configMap == nil || configMap.Data == nil {
+		return notificationContext, nil
+	}
+	if contextYAML, ok := configMap.Data["context"]; ok {
+		if err := yaml.Unmarshal([]byte(contextYAML), &notificationContext); err != nil {
+			return nil, err
+		}
+	}
+	return notificationContext, nil
 }
 
 // Send notifications for triggered event if user is subscribed
@@ -390,6 +411,13 @@ func (e *EventRecorderAdapter) sendNotifications(notificationsAPI api.API, objec
 	for _, destination := range destinations {
 		res, err := notificationsAPI.RunTrigger(trigger, objMap)
 		if err != nil {
+			// A "trigger is not configured" error is expected whenever a lifecycle
+			// event fires without a matching trigger configured. Log it at debug
+			// level and do not treat it as a notification failure.
+			if strings.Contains(err.Error(), "is not configured") {
+				logCtx.Debugf("Skipping trigger %s: %v", trigger, err)
+				continue
+			}
 			log.Errorf("Failed to run trigger, trigger: %s, destination: %s, namespace config: %s : %v",
 				trigger, destination, notificationsAPI.GetConfig().Namespace, err)
 			errors = append(errors, err)

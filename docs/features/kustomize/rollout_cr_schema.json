@@ -331,6 +331,11 @@
                                                     "query": {
                                                         "type": "string"
                                                     },
+                                                    "requestTimeout": {
+                                                        "default": "10s",
+                                                        "description": "RequestTimeout overrides the HTTP client timeout for requests to the Datadog API (e.g. 10s, 30s; default: 10s).",
+                                                        "type": "string"
+                                                    },
                                                     "secretRef": {
                                                         "description": "Secret refers to the name of the secret that should be used for an analysis and should exists in the namespace where the controller is.",
                                                         "properties": {
@@ -6115,6 +6120,10 @@
                                             "newRelic": {
                                                 "description": "NewRelic specifies the newrelic metric to query",
                                                 "properties": {
+                                                    "accountId": {
+                                                        "description": "AccountID optionally overrides the account-id from the profile secret, allowing a single\ncredential/profile to query any New Relic account. When empty, the account-id from the\nprofile secret is used (backward compatible).",
+                                                        "type": "string"
+                                                    },
                                                     "profile": {
                                                         "description": "Profile is the name of the secret holding NR account configuration",
                                                         "type": "string"
@@ -6149,6 +6158,33 @@
                                                     "authentication": {
                                                         "description": "Authentication details",
                                                         "properties": {
+                                                            "basicAuth": {
+                                                                "description": "BasicAuth config",
+                                                                "properties": {
+                                                                    "password": {
+                                                                        "description": "Password is the access policy token",
+                                                                        "type": "string"
+                                                                    },
+                                                                    "username": {
+                                                                        "description": "Username is the username in grafana cloud",
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "google": {
+                                                                "description": "Google config, an empty object enables Application Default Credentials",
+                                                                "properties": {
+                                                                    "scopes": {
+                                                                        "description": "OAuth2 scopes, defaults to https://www.googleapis.com/auth/monitoring.read",
+                                                                        "items": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "type": "array"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
                                                             "oauth2": {
                                                                 "description": "OAuth2 config",
                                                                 "properties": {
@@ -6284,6 +6320,33 @@
                                                     "authentication": {
                                                         "description": "Authentication details",
                                                         "properties": {
+                                                            "basicAuth": {
+                                                                "description": "BasicAuth config",
+                                                                "properties": {
+                                                                    "password": {
+                                                                        "description": "Password is the access policy token",
+                                                                        "type": "string"
+                                                                    },
+                                                                    "username": {
+                                                                        "description": "Username is the username in grafana cloud",
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "google": {
+                                                                "description": "Google config, an empty object enables Application Default Credentials",
+                                                                "properties": {
+                                                                    "scopes": {
+                                                                        "description": "OAuth2 scopes, defaults to https://www.googleapis.com/auth/monitoring.read",
+                                                                        "items": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "type": "array"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
                                                             "oauth2": {
                                                                 "description": "OAuth2 config",
                                                                 "properties": {
@@ -6749,6 +6812,11 @@
                                                     "query": {
                                                         "type": "string"
                                                     },
+                                                    "requestTimeout": {
+                                                        "default": "10s",
+                                                        "description": "RequestTimeout overrides the HTTP client timeout for requests to the Datadog API (e.g. 10s, 30s; default: 10s).",
+                                                        "type": "string"
+                                                    },
                                                     "secretRef": {
                                                         "description": "Secret refers to the name of the secret that should be used for an analysis and should exists in the namespace where the controller is.",
                                                         "properties": {
@@ -12533,6 +12601,10 @@
                                             "newRelic": {
                                                 "description": "NewRelic specifies the newrelic metric to query",
                                                 "properties": {
+                                                    "accountId": {
+                                                        "description": "AccountID optionally overrides the account-id from the profile secret, allowing a single\ncredential/profile to query any New Relic account. When empty, the account-id from the\nprofile secret is used (backward compatible).",
+                                                        "type": "string"
+                                                    },
                                                     "profile": {
                                                         "description": "Profile is the name of the secret holding NR account configuration",
                                                         "type": "string"
@@ -12567,6 +12639,33 @@
                                                     "authentication": {
                                                         "description": "Authentication details",
                                                         "properties": {
+                                                            "basicAuth": {
+                                                                "description": "BasicAuth config",
+                                                                "properties": {
+                                                                    "password": {
+                                                                        "description": "Password is the access policy token",
+                                                                        "type": "string"
+                                                                    },
+                                                                    "username": {
+                                                                        "description": "Username is the username in grafana cloud",
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "google": {
+                                                                "description": "Google config, an empty object enables Application Default Credentials",
+                                                                "properties": {
+                                                                    "scopes": {
+                                                                        "description": "OAuth2 scopes, defaults to https://www.googleapis.com/auth/monitoring.read",
+                                                                        "items": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "type": "array"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
                                                             "oauth2": {
                                                                 "description": "OAuth2 config",
                                                                 "properties": {
@@ -12702,6 +12801,33 @@
                                                     "authentication": {
                                                         "description": "Authentication details",
                                                         "properties": {
+                                                            "basicAuth": {
+                                                                "description": "BasicAuth config",
+                                                                "properties": {
+                                                                    "password": {
+                                                                        "description": "Password is the access policy token",
+                                                                        "type": "string"
+                                                                    },
+                                                                    "username": {
+                                                                        "description": "Username is the username in grafana cloud",
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "google": {
+                                                                "description": "Google config, an empty object enables Application Default Credentials",
+                                                                "properties": {
+                                                                    "scopes": {
+                                                                        "description": "OAuth2 scopes, defaults to https://www.googleapis.com/auth/monitoring.read",
+                                                                        "items": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "type": "array"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
                                                             "oauth2": {
                                                                 "description": "OAuth2 config",
                                                                 "properties": {
@@ -13183,6 +13309,11 @@
                                                     "query": {
                                                         "type": "string"
                                                     },
+                                                    "requestTimeout": {
+                                                        "default": "10s",
+                                                        "description": "RequestTimeout overrides the HTTP client timeout for requests to the Datadog API (e.g. 10s, 30s; default: 10s).",
+                                                        "type": "string"
+                                                    },
                                                     "secretRef": {
                                                         "description": "Secret refers to the name of the secret that should be used for an analysis and should exists in the namespace where the controller is.",
                                                         "properties": {
@@ -18967,6 +19098,10 @@
                                             "newRelic": {
                                                 "description": "NewRelic specifies the newrelic metric to query",
                                                 "properties": {
+                                                    "accountId": {
+                                                        "description": "AccountID optionally overrides the account-id from the profile secret, allowing a single\ncredential/profile to query any New Relic account. When empty, the account-id from the\nprofile secret is used (backward compatible).",
+                                                        "type": "string"
+                                                    },
                                                     "profile": {
                                                         "description": "Profile is the name of the secret holding NR account configuration",
                                                         "type": "string"
@@ -19001,6 +19136,33 @@
                                                     "authentication": {
                                                         "description": "Authentication details",
                                                         "properties": {
+                                                            "basicAuth": {
+                                                                "description": "BasicAuth config",
+                                                                "properties": {
+                                                                    "password": {
+                                                                        "description": "Password is the access policy token",
+                                                                        "type": "string"
+                                                                    },
+                                                                    "username": {
+                                                                        "description": "Username is the username in grafana cloud",
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "google": {
+                                                                "description": "Google config, an empty object enables Application Default Credentials",
+                                                                "properties": {
+                                                                    "scopes": {
+                                                                        "description": "OAuth2 scopes, defaults to https://www.googleapis.com/auth/monitoring.read",
+                                                                        "items": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "type": "array"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
                                                             "oauth2": {
                                                                 "description": "OAuth2 config",
                                                                 "properties": {
@@ -19136,6 +19298,33 @@
                                                     "authentication": {
                                                         "description": "Authentication details",
                                                         "properties": {
+                                                            "basicAuth": {
+                                                                "description": "BasicAuth config",
+                                                                "properties": {
+                                                                    "password": {
+                                                                        "description": "Password is the access policy token",
+                                                                        "type": "string"
+                                                                    },
+                                                                    "username": {
+                                                                        "description": "Username is the username in grafana cloud",
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "google": {
+                                                                "description": "Google config, an empty object enables Application Default Credentials",
+                                                                "properties": {
+                                                                    "scopes": {
+                                                                        "description": "OAuth2 scopes, defaults to https://www.googleapis.com/auth/monitoring.read",
+                                                                        "items": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "type": "array"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
                                                             "oauth2": {
                                                                 "description": "OAuth2 config",
                                                                 "properties": {
